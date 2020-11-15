@@ -20,50 +20,41 @@ def parse_font(font):
     result = result.reshape(32, 35)
     return result
 
-command = input("Select the desired excercise:")
+command = input("Usted puede elgir que ejercicio realizar. Los ejercicios disponibles son los siguiente:\n1a - Autoencoder basico\n1b - Denoising Autoencoder\n2 - Generacion de nueva muestra.\nElija el ejercicio que prefiera:")
 
 if command == "1a":
-  print("Loading data...")
+  print("Cargando informacion...\n")
   font = parse_font(font1)
-  # Parametros de la red
-  fac_ap = 0.2
-  precision = 0.00000001
-  epocas = 10000 #
-  epochs = 0
-  # Arquitectura de la red
-  n_entradas = font.shape[1] # numero de entradas
-  # cap_ocultas = 1 # Una capa oculta
-  n_ocultas = 6 # Neuronas en la capa oculta
-  n_salida = font.shape[1] # Neuronas en la capa de salida
-  # Valor de umbral o bia
-  us = 1.0 # umbral en neurona de salida
-  uoc = np.ones((n_ocultas,1),float) # umbral en las neuronas ocultas
-  # Matriz de pesos sinapticos
-  random.seed(0) # 
-  w_1 = random.rand(n_ocultas,n_entradas)
-  w_2 = random.rand(n_salida,n_ocultas)
-  # Funcion de activacion y su derivada.
-  funcion = sigmoide
-  derivada_funcion = dsigmoide
-  #Inicializar la red PMC
-  print(w_1)
-  print(w_2)
-  print("despues ... \n")
-  red = MLP(font,font,w_1,w_2,us,uoc,precision,epocas,fac_ap,n_ocultas,n_entradas,n_salida, funcion, derivada_funcion)
-  epochs,w1_a,w2_a,us_a,uoc_a,E = red.Aprendizaje(True)
-  print(w1_a)
-  print(w2_a)
-  print("error final: ")
-  print(red.error_red)
+  print("Informacion cargada exitosamente\n")
+  print("Creando del autoenconder:\n")
+  layers = [35,25,15,5,2,5,15,25,35]
+  n_inputs = 35
+  command = input("Seleccione metodo de optimizacion:\n1 - Powell\n2 - BFGS\n3 - Ninguno")
+  if command == "1":
+    optimizer = "Powell"
+  elif command == "2":
+    optimizer = "BFGS"
+  elif command == "3":
+    optimizer = "None"
+  autoencoder = MLP(layers, n_inputs, sigmoide, dsigmoide, optimizer)
+  #mostrar resultados autoencoder
 
-  print("Exiting.")
+  #mostrar encoder
+  
+  #mostrar decoder
+  
+  print("Ejercicio Finalizado.\n")
 
 elif command == "1b":
-  print("Loading data...")
+  print("Cargando informacion...\n")
+  # falta
+  print("Informacion cargada exitosamente\n")
 
-  print("Exiting.")
+  print("Ejercicio Finalizado.\n")
 
 elif command == "2":
-  print("Loading data...")
+  print("Cargando informacion...\n")
+  # falta
+  print("Informacion cargada exitosamente\n")
 
-  print("Exiting.")
+  print("Ejercicio Finalizado.\n")
