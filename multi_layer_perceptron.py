@@ -2,7 +2,7 @@ import sys
 import numpy as np
 import pandas as pd
 from scipy.optimize import minimize
-from datetime import datetime
+from datetime import datetime 
 
 class MLP:
 
@@ -39,7 +39,7 @@ class MLP:
 
         flattened_weights = self.flatten_weights(self.weights)
         print('Minimizing...')
-        res = minimize(self.cost, flattened_weights, method=self.optimizer)
+        res = minimize(self.cost, flattened_weights, method=self.optimizer, callback=self.optimize_callback)
         print('Minimized.')
         self.error = res.fun
         self.weights = self.unflatten_weights(res.x)
@@ -49,9 +49,16 @@ class MLP:
     def cost(self, data):
         unflattened_weights = self.unflatten_weights(data)
         pred = self.predict_weights(unflattened_weights)
-        error = np.sum((self.expected - pred) ** 2) / len(data)
-        print("Current error:" + str(error))
-        return error
+        self.error = np.sum((self.expected - pred) ** 2) / len(data)
+        
+        print("Current error:" + str(self.error))
+        return self.error
+   
+    def optimize_callback(self, xk):
+        print(self.cost(xk))
+        if self.cost(xk) < 0.09:
+            return True
+        return False 
 
     def predict(self, data):
         return self.forward(data)

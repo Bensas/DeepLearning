@@ -18,7 +18,7 @@ def parse_font(font):
             for bit in bits:
                 processed_char = np.append(processed_char, int(bit))
         result = np.append(result, processed_char, axis=0)
-    result = result.reshape(10, 35)
+    result = result.reshape(32, 35)
     return result
 
 command = input("Usted puede elgir que ejercicio realizar. Los ejercicios disponibles son los siguiente:\n1a - Autoencoder basico\n1b - Denoising Autoencoder\n2 - Generacion de nueva muestra.\nElija el ejercicio que prefiera:")
