@@ -47,10 +47,11 @@ if command == "1a":
   #mostrar resultados autoencoder
 
   #mostrar encoder
-  activations = []
-  for char in font:
-    activations.append(autoencoder.forward(char))
-  print(activations)
+  # encoder = get_encoder_from_autoencoder(autoencoder)
+  # activations = []
+  # for char in font:
+  #   activations.append(encoder.forward(char))
+  # print(activations)
   # plt.scatter(activations)
   # plt.show()
   #mostrar decoder

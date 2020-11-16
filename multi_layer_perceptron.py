@@ -50,7 +50,7 @@ class MLP:
         unflattened_weights = self.unflatten_weights(data)
         pred = self.predict_weights(unflattened_weights)
         error = np.sum((self.expected - pred) ** 2) / len(data)
-        print(error)
+        print("Current error:" + str(error))
         return error
 
     def predict(self, data):
