@@ -37,25 +37,29 @@ class MLP:
         self.expected = expected
         self.error = 10000
 
+        print(len(self.weights))
         flattened_weights = self.flatten_weights(self.weights)
         print('Minimizing...')
         res = minimize(self.cost, flattened_weights, method=self.optimizer, callback=self.optimize_callback)
         print('Minimized.')
+        print("Final error:" + str(self.error))
         self.error = res.fun
         self.weights = self.unflatten_weights(res.x)
-        print(res)
-        # print(self.weights)
+
+    def get_encoder_from_autoencoder(self, autoencoder, encoder_layers):
+        return autoencoder.weights[0:len(encoder_layers)+1]
+
+    def get_decoder_from_autoencoder(self, autoencoder, encoder_layers):
+        return autoencoder.weights[len(encoder_layers)+1:len(autoencoder.weights)]
     
     def cost(self, data):
         unflattened_weights = self.unflatten_weights(data)
         pred = self.predict_weights(unflattened_weights)
         self.error = np.sum((self.expected - pred) ** 2) / len(data)
         
-        print("Current error:" + str(self.error))
         return self.error
    
     def optimize_callback(self, xk):
-        print(self.cost(xk))
         if self.cost(xk) < 0.09:
             return True
         return False 
