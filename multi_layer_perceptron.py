@@ -38,7 +38,9 @@ class MLP:
         self.error = 10000
 
         flattened_weights = self.flatten_weights(self.weights)
+        print('Minimizing...')
         res = minimize(self.cost, flattened_weights, method=self.optimizer)
+        print('Minimized.')
         self.error = res.fun
         self.weights = self.unflatten_weights(res.x)
         print(res)
@@ -48,14 +50,13 @@ class MLP:
         unflattened_weights = self.unflatten_weights(data)
         pred = self.predict_weights(unflattened_weights)
         error = np.sum((self.expected - pred) ** 2) / len(data)
+        print(error)
         return error
 
     def predict(self, data):
         return self.forward(data)
 
-    # We expect data to already have the bias column added
     def forward(self, data):
-        # Cicle through each layer
         for i in range(len(self.layers)):
             layer_input = data if i == 0 else self.layer_activations[i - 1]
             layer_input = np.column_stack((layer_input, np.ones((len(layer_input),1))))
