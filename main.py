@@ -18,38 +18,55 @@ def parse_font(font):
             for bit in bits:
                 processed_char = np.append(processed_char, int(bit))
         result = np.append(result, processed_char, axis=0)
-    result = result.reshape(32, 35)
+    result = result.reshape(10, 35)
     return result
 
-command = input("Select the desired excercise:")
+command = input("Usted puede elgir que ejercicio realizar. Los ejercicios disponibles son los siguiente:\n1a - Autoencoder basico\n1b - Denoising Autoencoder\n2 - Generacion de nueva muestra.\nElija el ejercicio que prefiera:")
 
 if command == "1a":
-  print("Loading data...")
+  print("Cargando informacion...\n")
   font = parse_font(font1)
-
-  print("Data loaded, training network...")
+  print("Informacion cargada exitosamente\n")
+  print("Creando del autoenconder:\n")
+  layers = [35,25,15,5,2,5,15,25,35]
+  n_inputs = 35
+  command = input("Seleccione metodo de optimizacion:\n1 - Powell\n2 - BFGS\n3 - Ninguno")
+  if command == "1":
+    optimizer = "Powell"
+  elif command == "2":
+    optimizer = "BFGS"
+  elif command == "3":
+    optimizer = "None"
+  autoencoder = MLP(layers, n_inputs, sigmoide, dsigmoide, optimizer)
+  print("Entrenando red...")
   start = time.time()
-  red = MLP([35, 20, 10 , 6, 2, 6, 10, 20, 35], 35, sigmoide, dsigmoide, 'Powell')
-  red.train_weights(font, font)
+  autoencoder.train_weights(font, font)
   end = time.time()
-  print("Network trained. Elapsed time:")
+  print("Red entrenada. Tiempo transcurrido:")
   print(end - start)
+  #mostrar resultados autoencoder
 
+  #mostrar encoder
   activations = []
   for char in font:
-    activations.append(red.forward(char))
+    activations.append(autoencoder.forward(char))
   print(activations)
   # plt.scatter(activations)
   # plt.show()
-
-  print("Exiting.")
+  #mostrar decoder
+  
+  print("Ejercicio Finalizado.\n")
 
 elif command == "1b":
-  print("Loading data...")
+  print("Cargando informacion...\n")
+  # falta
+  print("Informacion cargada exitosamente\n")
 
-  print("Exiting.")
+  print("Ejercicio Finalizado.\n")
 
 elif command == "2":
-  print("Loading data...")
+  print("Cargando informacion...\n")
+  # falta
+  print("Informacion cargada exitosamente\n")
 
-  print("Exiting.")
+  print("Ejercicio Finalizado.\n")
