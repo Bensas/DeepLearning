@@ -43,15 +43,21 @@ class MLP:
         try:
             res = minimize(self.cost, flattened_weights, method=self.optimizer)
         except RuntimeError:
-            print('Hey mona');
+            print('Hey mona')
         print('Minimized.')
         print("Final error:" + str(self.error))
 
     def get_encoder_from_autoencoder(self, autoencoder, encoder_layers):
-        return autoencoder.weights[0:len(encoder_layers)+1]
+        result = MLP(encoder_layers, encoder_layers[0], None, None, None)
+        result.weights = autoencoder.weights[0:len(encoder_layers)]
+        result.error = autoencoder.error
+        return result
 
-    def get_decoder_from_autoencoder(self, autoencoder, encoder_layers):
-        return autoencoder.weights[len(encoder_layers)+1:len(autoencoder.weights)]
+    def get_decoder_from_autoencoder(self, autoencoder, decoder_layers):
+        result = MLP(decoder_layers, decoder_layers[0], None, None, None)
+        result.weights = autoencoder.weights[-len(decoder_layers):]
+        result.error = autoencoder.error
+        return result
     
     def cost(self, data):
         self.weights = self.unflatten_weights(data)
