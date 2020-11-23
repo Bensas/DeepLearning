@@ -39,30 +39,31 @@ class MLP:
 
         print(len(self.weights))
         flattened_weights = self.flatten_weights(self.weights)
-        print('Minimizing...')
+        print('Training...')
         try:
             res = minimize(self.cost, flattened_weights, method=self.optimizer)
         except RuntimeError:
-            print('Hey mona')
-        print('Minimized.')
+            print('Training finished')
         print("Final error:" + str(self.error))
 
-    def get_encoder_from_autoencoder(self, autoencoder, encoder_layers):
-        result = MLP(encoder_layers, encoder_layers[0], None, None, None)
+    @staticmethod
+    def get_encoder_from_autoencoder(autoencoder, encoder_layers):
+        result = MLP(encoder_layers, encoder_layers[0], autoencoder.activation_function, autoencoder.activation_derivate, None)
         result.weights = autoencoder.weights[0:len(encoder_layers)]
         result.error = autoencoder.error
         return result
-
-    def get_decoder_from_autoencoder(self, autoencoder, decoder_layers):
+    
+    @staticmethod
+    def get_decoder_from_autoencoder(autoencoder, decoder_layers):
         result = MLP(decoder_layers, decoder_layers[0], None, None, None)
         result.weights = autoencoder.weights[-len(decoder_layers):]
         result.error = autoencoder.error
         return result
     
-    def cost(self, data):
-        self.weights = self.unflatten_weights(data)
-        pred = self.predict_weights(self.weights)
-        self.error = np.sum((self.expected - pred) ** 2) / len(data)
+    def cost(self, new_weights):
+        self.weights = self.unflatten_weights(new_weights)
+        pred = self.forward(self.input)
+        self.error = np.sum((self.expected - pred) ** 2) / len(new_weights)
         if self.error < 0.09:
             raise RuntimeError("Optimization finished :DDDDDDD")
         print("Current error: " + str(self.error))
@@ -76,14 +77,6 @@ class MLP:
             layer_input = data if i == 0 else self.layer_activations[i - 1]
             layer_input = np.column_stack((layer_input, np.ones((len(layer_input),1))))
             self.layer_outputs[i] = layer_input.dot(self.weights[i])
-            self.layer_activations[i] = self.activation_function(self.layer_outputs[i])
-        return self.layer_activations[len(self.layers) - 1]
-    
-    def predict_weights(self, weights):
-        for i in range(len(weights)):
-            layer_input = self.input if i == 0 else self.layer_activations[i - 1]
-            layer_input = np.column_stack((layer_input, np.ones((len(layer_input),1))))
-            self.layer_outputs[i] = layer_input.dot(weights[i])
             self.layer_activations[i] = self.activation_function(self.layer_outputs[i])
         return self.layer_activations[len(self.layers) - 1]
 
