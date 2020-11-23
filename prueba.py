@@ -1,14 +1,17 @@
-encoder_layers = [35, 25, 15, 5]
-latent_layers = 2
-decoder_layers = [5, 15, 25, 35]
-index = 0
-layers = [0] * (len(encoder_layers) + 1 + len(decoder_layers))
-for number in encoder_layers:
-    layers[index] = number
-    index = index + 1
-layers[index] = latent_layers
-index = index + 1
-for number in decoder_layers:
-    layers[index] = number
-    index = index + 1
-print(layers)
+fonts = [0x00,0x01,0x02,0x1a,0x01f]
+answer = [0] * len(fonts) * 5
+index_answer = 0
+index_array = 0
+while(index_answer < len(fonts)):
+    integer = str(bin(int(str(fonts[index_answer]), 10)))
+    array = integer[2:]
+    if(len(array) < 5):
+        while(index_array < (5 - len(array))):
+            answer[index_answer*5 + index_array] = '0'
+            index_array = index_array + 1
+    while(index_array < 5):
+        answer[(index_answer*5) + index_array] = array[index_array - (5 - len(array))]
+        index_array = index_array + 1
+    index_answer = index_answer + 1
+    index_array = 0
+return answer
