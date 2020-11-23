@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import time
 
+from noisy_functions import noisy_function_lighter, noisy_function_heavier, hexa_to_binary
 from fonts import font1, font2, font3
 from multi_layer_perceptron import MLP
 from activation_functions import tanh, dtanh, sigmoide, dsigmoide
