@@ -33,10 +33,10 @@ def hexa_to_binary(fonts):
         array = integer[2:]
         if(len(array) < 5):
             while(index_array < (5 - len(array))):
-                answer[index_answer*5 + index_array] = '0'
+                answer[index_answer*5 + index_array] = 0
                 index_array = index_array + 1
         while(index_array < 5):
-            answer[(index_answer*5) + index_array] = array[index_array - (5 - len(array))]
+            answer[(index_answer*5) + index_array] = int(array[index_array - (5 - len(array))])
             index_array = index_array + 1
         index_answer = index_answer + 1
         index_array = 0
