@@ -63,22 +63,26 @@ if command == "1a":
   print(" segundos")
   #mostrar resultados autoencoder
 
-  # #MOSTRAR ENCODER
-  # encoder = get_encoder_from_autoencoder(autoencoder, encoder_layers) #modifque para que reciba hasta donde deberia copiar, sabiendo todas las capas.
-  # activations = []
-  # for char in font:
-  #   activations.append(encoder.forward(char))
-  # print(activations)
-  # # plt.scatter(activations)
-  # # plt.show()
+  #Latent layer values
+  encoder = MLP.get_encoder_from_autoencoder(autoencoder, encoder_layers)
+  activations = encoder.forward(font)
+
+  #Plotting
+  plt.title("Espacio latente")
+  x, y = activations.T
+  plt.scatter(x, y)
+  for i, char in enumerate(activations):
+    plt.text(char[0], char[1], str(i))
+  plt.show()
+
   # #MOSTRAR DECODER
-  # decoder = get_decoder_from_autoencoder(autoencoder, decoder_layers, latent_layers)
-  # activations = []
-  # for char in font:
-  #   activations.append(decoder.forward(char))
-  # print(activations)
-  # # plt.scatter(activations)
-  # # plt.show()
+  decoder = get_decoder_from_autoencoder(autoencoder, decoder_layers, latent_layers)
+  activations = []
+  for char in font:
+    activations.append(decoder.forward(char))
+  print(activations)
+  # plt.scatter(activations)
+  # plt.show()
   
   print("Ejercicio Finalizado.\n")
 

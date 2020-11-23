@@ -39,17 +39,16 @@ class MLP:
 
         print(len(self.weights))
         flattened_weights = self.flatten_weights(self.weights)
-        print('Minimizing...')
+        print('Training...')
         try:
             res = minimize(self.cost, flattened_weights, method=self.optimizer)
         except RuntimeError:
-            print('Hey mona')
-        print('Minimized.')
+            print('Training finished')
         print("Final error:" + str(self.error))
 
     @staticmethod
     def get_encoder_from_autoencoder(autoencoder, encoder_layers):
-        result = MLP(encoder_layers, encoder_layers[0], None, None, None)
+        result = MLP(encoder_layers, encoder_layers[0], autoencoder.activation_function, autoencoder.activation_derivate, None)
         result.weights = autoencoder.weights[0:len(encoder_layers)]
         result.error = autoencoder.error
         return result
