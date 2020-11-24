@@ -77,7 +77,7 @@ if command == "1a":
   plt.show()
 
   # #MOSTRAR DECODER
-  decoder = get_decoder_from_autoencoder(autoencoder, decoder_layers, latent_layers)
+  decoder = MLP.get_decoder_from_autoencoder(autoencoder, decoder_layers, latent_layers)
   activations = []
   for char in font:
     activations.append(decoder.forward(char))
@@ -89,7 +89,31 @@ if command == "1a":
 
 elif command == "1b":
   print("Cargando informacion...\n")
-  # falta
+  font = hexa_to_binary(font1)
+  noisy_font = noisy_function_heavier(font, 0.5)
+  print("Informacion cargada exitosamente\n")
+  print("Creando del autoenconder...\n")
+  encoder_layers = [35, 20, 10, 6, 2]
+  decoder_layers = [2, 6, 10, 20, 35]
+  layers = put_layers_together(encoder_layers, decoder_layers)
+  n_inputs = encoder_layers[0]
+  command = input("Seleccione metodo de optimizacion:\n1 - Powell\n2 - BFGS\n3 - Newton\n4 - Gradientes Conjugados\n5 - Ninguno\nSeleccione: ")
+  if command == "1":
+    optimizer = "Powell"
+  elif command == "2":
+    optimizer = "BFGS"
+  elif command == "3":
+    optimizer = "Newton-CG"
+  elif command == "4":
+    optimizer = "CG"
+  autoencoder = MLP(layers, n_inputs, sigmoide, dsigmoide, optimizer)
+  print("Entrenando red...")
+  start = time.time()
+  autoencoder.train_weights(noisy_font, font)
+  end = time.time()
+  print("Red entrenada.\n Tiempo transcurrido:")
+  print(end - start)
+  print(" segundos\n")
   print("Informacion cargada exitosamente\n")
 
   print("Ejercicio Finalizado.\n")
