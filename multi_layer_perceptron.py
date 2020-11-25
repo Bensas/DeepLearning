@@ -25,7 +25,6 @@ class MLP:
         self.max_epochs = max_epochs
         self.error = 0
         self.error_threshold = 0.5
-        self.batch = False
         self.momentum = momentum
 
         for i in range(len(layers)):
@@ -37,18 +36,14 @@ class MLP:
     def train_weights(self, data, expected):
         self.error = self.error_threshold + 1
         for epoch in range(self.max_epochs):
-            if self.batch:
-                self.forward(data)        
-                self.back_prop(data, expected, epoch)
-            else:
-                error = 0
-                for sample,result in zip(data,expected):
-                    row = np.array([sample])
-                    self.forward(row)        
-                    self.back_prop(row, result, epoch)
-                    error += (np.sum(result - self.layer_activations[len(self.layers) - 1]) ** 2)
-                self.error = error / len(data)
-                self.error_history = np.append(self.error_history, self.error)
+            error = 0
+            for sample,result in zip(data,expected):
+                row = np.array([sample])
+                self.forward(row)        
+                self.backpropagate(row, result, epoch)
+                error += (np.sum(result - self.layer_activations[len(self.layers) - 1]) ** 2)
+            self.error = error / len(data)
+            self.error_history = np.append(self.error_history, self.error)
             self.learning_rate += self.learning_rate_delta
             print(self.learning_rate)
             print(self.error)
@@ -63,7 +58,7 @@ class MLP:
             self.layer_activations[i] = self.activ_function(self.layer_outputs[i])
         return self.layer_activations[len(self.layers) - 1]
         
-    def back_prop(self, data, expected, epoch):
+    def backpropagate(self, data, expected, epoch):
         output_layer = len(self.layers) - 1
         error_vector = (expected - self.layer_activations[output_layer])
         for i in range(output_layer, -1, -1):
