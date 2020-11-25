@@ -1,130 +1,124 @@
-import sys
 import numpy as np
-import pandas as pd
-from scipy.optimize import minimize
-from datetime import datetime 
+import matplotlib.pyplot as plt
+from activation_functions import tanh, dtanh, sigmoide, dsigmoide
 
 class MLP:
 
-    def __init__(
-            self,
-            layers, 
-            num_of_inputs,
-            num_of_outputs,
-            activation_function,
-            activation_function_derivate,
-            optimizer='Powell'):
-        self.num_of_inputs = num_of_inputs
+    def __init__(self, layers, data_attributes, beta=0.5, start_lr=0.5, end_lr=0.01, lr_decay='linear', max_epochs=10000, activ_function=sigmoide, activ_function_derivative=dsigmoide):
 
-        self.optimizer = optimizer
         self.layers = layers
-        self.weights = [None] * (len(layers)+1)
-        self.bias = [None] * (len(layers)+1)
-        self.layer_outputs = [None] * (len(layers) + 1)
-        self.layer_activations = [None] * (len(layers) + 1)
-        self.deltas = [None] * (len(layers) + 1)
-        self.deltaW = [None] * (len(layers) + 1)
-        self.activation_function = activation_function
-        self.activation_derivate = activation_function_derivate
-        self.cost_counter = 0
-        
-        for i in range(len(layers)+1):
-            layer_output_counts = num_of_outputs if i == len(layers) else layers[i]
-            layer_input_counts  = num_of_inputs if i == 0 else layers[i-1]
-            self.weights[i] = np.random.randn(layer_input_counts,layer_output_counts)
-            self.bias[i] = np.ones((layer_output_counts,1))
-        # print(self.weights)
-        for weight in self.weights:
-            print(weight.shape)
-        # print(self.ds)
+        self.weights = []
+        self.bias = []
+        self.layer_outputs = [None] * (len(layers))
+        self.layer_activations = [None] * (len(layers))
+        self.deltas = [None] * (len(layers))
+        self.deltaW = [None] * (len(layers))
+        self.learning_rate = np.array([])
+        self.error_history = np.array([])
+        self.activ_function = activ_function
+        self.activ_function_derivative = activ_function_derivative
+        self.start_learning_rate = start_lr
+        self.end_learning_rate = end_lr
+        self.learning_rate_decay = lr_decay
+        self.beta = beta
+        self.max_epochs = max_epochs
+        self.error = 0
+        self.error_threshold = 1e-5
+        self.batch = False
+
+        for i in range(len(layers)):
+            l_out = layers[i]
+            l_in  = data_attributes if i == 0 else layers[i-1]
+            self.weights.append(np.random.randn(l_in+1,l_out))
+            self.bias.append(np.ones((l_out,1)))
 
     def train_weights(self, data, expected):
-        self.input = data
-        print('monana')
-        print(len(self.input[0]))
-        self.expected = expected
-        self.error = 10000
+        self.error = self.error_threshold + 1
+        for epoch in range(self.max_epochs):
+            if self.batch:
+                self.forward(data)        
+                self.back_prop(data, expected, epoch)
+            else:
+                error = 0
+                for sample,result in zip(data,expected):
+                    row = np.array([sample])
+                    self.forward(row)        
+                    self.back_prop(row, result, epoch)
+                    error += (np.sum(result - self.layer_activations[len(self.layers) - 1]) ** 2)
+                self.error = error / len(data)
+                self.error_history = np.append(self.error_history, self.error)
 
-        print(len(self.weights))
-        flattened_weights = self.flatten_weights(self.weights)
-        print('Training...')
-        try:
-            res = minimize(self.cost, flattened_weights, method=self.optimizer)
-        except RuntimeError:
-            print('Training finished')
-        print("Final error:" + str(self.error))
+            print(self.error)
+            if self.error < self.error_threshold:
+                break
 
+
+    # We expect data to already have the bias column added
+    def forward(self, data):
+        # Cycle through each layer
+        for i in range(len(self.layers)):
+            layer_input = data if i == 0 else self.layer_activations[i - 1]
+            layer_input = np.column_stack((layer_input, np.ones((len(layer_input),1))))
+            self.layer_outputs[i] = layer_input.dot(self.weights[i])
+            self.layer_activations[i] = self.activ_function(self.layer_outputs[i])
+        return self.layer_activations[len(self.layers) - 1]
+        
+    def back_prop(self, data, expected, epoch):
+        output_layer = len(self.layers) - 1
+        error_vector = (expected - self.layer_activations[output_layer])
+        for i in range(output_layer, -1, -1):
+            # Casp especial para ultima y para primer layer:
+
+            
+            curr_output = self.layer_outputs[i]
+
+            if i == output_layer:
+                self.deltas[i] = error_vector * (self.activ_function_derivative(self.layer_outputs[i]))
+
+            else:
+                dt = (self.deltas[i+1].dot(self.weights[i+1].T))
+                self.deltas[i] = self.activ_function_derivative(curr_output) * dt[:,:-1]
+
+        # create learning rate list for decay options
+        self.get_lr_list(decay=self.learning_rate_decay)
+
+        for i in range(len(self.layers)):
+            prev_activation = data if i == 0 else self.layer_activations[i - 1]
+            prev_activation = np.column_stack((prev_activation, np.ones((len(prev_activation),1))))
+            self.deltaW[i] = self.learning_rate[epoch] * ((prev_activation).T).dot(self.deltas[i])
+            # print('epoch: %f \t lr: %f' % (epoch, self.learning_rate[epoch]))
+
+        # Actualizar los pesos
+        for i in range(output_layer, -1, -1):
+            self.weights[i] = self.weights[i] + self.deltaW[i]
+            # self.bias[i] = self.bias[i] + self.deltaB[i]
+    
     @staticmethod
     def get_encoder_from_autoencoder(autoencoder, encoder_layers):
-        result = MLP(encoder_layers, encoder_layers[0], encoder_layers[-1], autoencoder.activation_function, autoencoder.activation_derivate)
+        result = MLP(encoder_layers, encoder_layers[0])
+        result.beta = autoencoder.beta
         result.weights = autoencoder.weights[0:len(encoder_layers)]
         result.error = autoencoder.error
         return result
     
     @staticmethod
     def get_decoder_from_autoencoder(autoencoder, decoder_layers):
-        result = MLP(decoder_layers, decoder_layers[0], decoder_layers[-1], autoencoder.activation_function, autoencoder.activation_derivate)
-        result.weights = autoencoder.weights[-len(decoder_layers):]
-        for weight in result.weights:
-            print(len(weight))
-        print(result.weights[0])
-        print(len(result.weights[0]))
+        result = MLP(decoder_layers, decoder_layers[0])
+        result.beta = autoencoder.beta
+        result.weights = autoencoder.weights[l-en(decoder_layers):]
         result.error = autoencoder.error
         return result
-    
-    def cost(self, new_weights):
-        self.cost_counter += 1
-        self.weights = self.unflatten_weights(new_weights)
-        # print(len(new_weights))
-        pred = self.forward(self.input)
-        # if self.cost_counter % 10 == 0:
-            # print('Pred:')
-            # print(pred)
-            # print('Expected:')
-            # print(self.expected)
-            # print("Current error: " + str(self.error))
 
-        self.error = np.sum((self.expected - pred) ** 2)
-        if self.error < 0.009:
-            raise RuntimeError("Optimization finished :DDDDDDD")
-        # print("Current error: " + str(self.error))
-        return self.error
+    def get_lr_list(self, decay='None'):
+        if decay == 'None':
+            epoch_list = np.ones(self.max_epochs)
+            self.learning_rate = self.start_learning_rate * epoch_list
+        elif decay == 'hill':
+            epoch_list = np.linspace(0, 1, self.max_epochs)
+            self.learning_rate = (self.start_learning_rate - self.end_learning_rate) / (1 + (epoch_list / 0.5) ** 4) + self.end_learning_rate
 
-    def predict(self, data):
-        return self.forward(data)
+        elif decay == 'linear':
+            self.learning_rate = np.linspace(self.start_learning_rate, self.end_learning_rate, self.max_epochs)
+        else:
+            exit('exiting: invalid learning rate decay method chosen.')
 
-    def forward(self, data, printTrue=False):
-        # print("Heeeey mona")
-        print(self.weights[0])
-        for i in range(len(self.weights)):
-            layer_input = data if i == 0 else self.layer_activations[i - 1]
-            if (printTrue):
-                print("LI")
-                print(layer_input)
-            # print(layer_input.shape)
-                print("Weight")
-                # print(self.weights[i])
-            self.layer_outputs[i] = layer_input.dot(self.weights[i])
-            self.layer_activations[i] = self.activation_function(self.layer_outputs[i])
-            if printTrue:           
-                print("LA")
-                print(self.layer_activations[i])
-            # print(self.layer_outputs[i].shape)
-        return self.layer_activations[len(self.weights) - 1]
-
-    def flatten_weights(self, unflattened_weights):
-        flattened_weights = unflattened_weights[0].flatten()
-        for i in range(len(unflattened_weights)):
-            if i > 0:
-                flattened_weights = np.concatenate((flattened_weights, unflattened_weights[i].flatten()))
-        return flattened_weights
-
-    def unflatten_weights(self, flattened_weights):
-        unflattened_weights = [None] * (len(self.weights))
-        index = 0
-        for i in range(len(self.weights)):
-            layer_shape = self.weights[i].shape
-            layer_items = layer_shape[0] * layer_shape[1]
-            unflattened_weights[i] = flattened_weights[index:index+layer_items].reshape(layer_shape)
-            index += layer_items
-        return unflattened_weights

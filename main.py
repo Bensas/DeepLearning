@@ -46,25 +46,23 @@ def arr_step(input_arr):
 command = input("Usted puede elgir que ejercicio realizar. Los ejercicios disponibles son los siguiente:\n1a - Autoencoder basico\n1b - Denoising Autoencoder\n2 - Generacion de nueva muestra.\nElija el ejercicio que prefiera: ")
 
 if command == "1a":
+  
   print("Cargando informacion...\n")
   font = parse_font(font1)
   print("Informacion cargada exitosamente\n")
+  # command = input("Seleccione metodo de optimizacion:\n1 - Powell\n2 - BFGS\n3 - Newton\n4 - Gradientes Conjugados\n5 - Ninguno\nSeleccione: ")
+  # if command == "1":
+  #   optimizer = "Powell"
+  # elif command == "2":
+  #   optimizer = "BFGS"
+  # elif command == "3":
+  #   optimizer = "Newton-CG"
+  # elif command == "4":
+  #   optimizer = "CG"
   print("Creando del autoenconder...\n")
-  encoder_layers = [20, 10, 6, 2]
-  decoder_layers = [2, 6, 10, 20]
-  layers = put_layers_together(encoder_layers, decoder_layers)
-  n_inputs = len(font[0])
-  n_outputs = len(font[0])
-  command = input("Seleccione metodo de optimizacion:\n1 - Powell\n2 - BFGS\n3 - Newton\n4 - Gradientes Conjugados\n5 - Ninguno\nSeleccione: ")
-  if command == "1":
-    optimizer = "Powell"
-  elif command == "2":
-    optimizer = "BFGS"
-  elif command == "3":
-    optimizer = "Newton-CG"
-  elif command == "4":
-    optimizer = "CG"
-  autoencoder = MLP(layers, n_inputs, n_outputs, sigmoide, dsigmoide, optimizer)
+  architecture = [35, 25, 17, 10, 6, 10, 17,25, 35]
+  attributes = len(font[0])
+  autoencoder = MLP(architecture, attributes)
   print("Entrenando red...")
   start = time.time()
   autoencoder.train_weights(font, font)
@@ -72,15 +70,11 @@ if command == "1a":
   print("Red entrenada.\n Tiempo transcurrido:")
   print(end - start)
   print(" segundos")
-  #mostrar resultados autoencoder
 
-  print(font[0].reshape((5, 7)))
-  activ1 = autoencoder.forward(font[0], True)
-  print(activ1)
-
-  print(font[1].reshape((5, 7)))
-  activ2 = autoencoder.forward(font[1], True)
-  print(activ2)
+  print(font)
+  activ1 = autoencoder.forward(font)
+  for arr in activ1:
+    print(arr_step(arr))
 
   #Latent layer values
   encoder = MLP.get_encoder_from_autoencoder(autoencoder, encoder_layers)
@@ -138,6 +132,16 @@ elif command == "1b":
   print("Ejercicio Finalizado.\n")
 
 elif command == "2":
+  data = parse_font(font1)
+  architecture = [35, 25, 17, 10, 6, 10, 17,25, 35]
+  attributes = len(data[0])
+  mlp = MLP(architecture, attributes)
+  mlp.train_weights(data, data)
+
+  print(data)
+  activ1 = mlp.forward(data)
+  for arr in activ1:
+    print(arr_step(arr))
   print("Cargando informacion...\n")
   # falta
   print("Informacion cargada exitosamente\n")
