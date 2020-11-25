@@ -4,7 +4,7 @@ from activation_functions import tanh, dtanh, sigmoide, dsigmoide
 
 class MLP:
 
-    def __init__(self, layers, data_attributes, beta=0.5, start_lr=0.5, end_lr=0.01, lr_decay='linear', max_epochs=10000, activ_function=sigmoide, activ_function_derivative=dsigmoide):
+    def __init__(self, layers, data_attributes, beta=0.5, start_lr=0.05, end_lr=0.01, lr_decay='linear', max_epochs=10000, activ_function=sigmoide, activ_function_derivative=dsigmoide):
 
         self.layers = layers
         self.weights = []
@@ -105,7 +105,7 @@ class MLP:
     def get_decoder_from_autoencoder(autoencoder, decoder_layers):
         result = MLP(decoder_layers, decoder_layers[0])
         result.beta = autoencoder.beta
-        result.weights = autoencoder.weights[l-en(decoder_layers):]
+        result.weights = autoencoder.weights[-len(decoder_layers):]
         result.error = autoencoder.error
         return result
 
