@@ -9,6 +9,17 @@ from fonts import font1, font2, font3
 from multi_layer_perceptron import MLP
 from activation_functions import tanh, dtanh, sigmoide, dsigmoide
 
+def print_nicer(array):
+  index_array = 0
+  while(index_array < len(array)):
+    index_inside = 0
+    while(index_inside < len(array[index_array])):
+      print(array[index_array][index_inside:index_inside + 5])
+      index_inside = index_inside + 5
+    index_array = index_array + 1
+    print("\n\n")
+  return
+
 def put_layers_together(encoder_layers, decoder_layers):
   index = 0
   layers = [0] * (len(encoder_layers) + len(decoder_layers) - 1)
@@ -61,7 +72,7 @@ if command == "1a":
   #   optimizer = "CG"
   print("Creando del autoenconder...\n")
   architecture = [35, 20, 10, 6, 2, 6, 10, 20, 35]
-  attributes = len(font[0])
+  attributes = 35
   autoencoder = MLP(architecture, attributes)
   print("Entrenando red...")
   start = time.time()
@@ -71,13 +82,17 @@ if command == "1a":
   print(end - start)
   print(" segundos")
 
-  print(font)
+  print_nicer(font)
   activ1 = autoencoder.forward(font)
   for arr in activ1:
-    print(arr_step(arr))
+    index_array = 0
+    while(index_array < len(arr)):
+      print(arr_step(arr)[index_array:index_array + 5])
+      index_array = index_array + 5
+    print("\n\n")
 
   #Latent layer values
-  encoder = MLP.get_encoder_from_autoencoder(autoencoder, [35, 25, 15, 5, 2])
+  encoder = MLP.get_encoder_from_autoencoder(autoencoder, [35, 20, 10, 6, 2])
   activations = encoder.forward(font)
 
   #Plotting
@@ -89,7 +104,7 @@ if command == "1a":
   plt.show()
 
   # generate new characters
-  decoder = MLP.get_decoder_from_autoencoder(autoencoder, [2, 5, 15, 25, 35])
+  decoder = MLP.get_decoder_from_autoencoder(autoencoder, [2, 6, 10, 20, 35])
   for i in range(2):
     activ = arr_step(decoder.forward(np.random.randn(1, 2))[0])
     print(activ)

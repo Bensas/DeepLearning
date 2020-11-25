@@ -4,7 +4,7 @@ from activation_functions import tanh, dtanh, sigmoide, dsigmoide
 
 class MLP:
 
-    def __init__(self, layers, data_attributes, beta=0.5, start_lr=0.05, end_lr=0.01, lr_decay='linear', max_epochs=10000, activ_function=sigmoide, activ_function_derivative=dsigmoide, momentum=0.8):
+    def __init__(self, layers, data_attributes, beta=0.5, start_lr=0.05, end_lr=0.01, lr_decay='linear', max_epochs=10000, activ_function=sigmoide, activ_function_derivative=dsigmoide, momentum=0.4):
 
         self.layers = layers
         self.weights = []
