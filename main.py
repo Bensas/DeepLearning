@@ -34,6 +34,15 @@ def parse_font(font):
   result = result.reshape(len(font), 35)
   return result
 
+def step(num):
+  return 0 if num < 0.5 else 1
+
+def arr_step(input_arr):
+  result = []
+  for i, number in enumerate(input_arr):
+    result.append(step(number))
+  return np.array(result)
+
 command = input("Usted puede elgir que ejercicio realizar. Los ejercicios disponibles son los siguiente:\n1a - Autoencoder basico\n1b - Denoising Autoencoder\n2 - Generacion de nueva muestra.\nElija el ejercicio que prefiera: ")
 
 if command == "1a":
@@ -41,10 +50,11 @@ if command == "1a":
   font = parse_font(font1)
   print("Informacion cargada exitosamente\n")
   print("Creando del autoenconder...\n")
-  encoder_layers = [35, 20, 10, 6, 2]
-  decoder_layers = [2, 6, 10, 20, 35]
+  encoder_layers = [20, 10, 6, 2]
+  decoder_layers = [2, 6, 10, 20]
   layers = put_layers_together(encoder_layers, decoder_layers)
-  n_inputs = encoder_layers[0]
+  n_inputs = len(font[0])
+  n_outputs = len(font[0])
   command = input("Seleccione metodo de optimizacion:\n1 - Powell\n2 - BFGS\n3 - Newton\n4 - Gradientes Conjugados\n5 - Ninguno\nSeleccione: ")
   if command == "1":
     optimizer = "Powell"
@@ -54,7 +64,7 @@ if command == "1a":
     optimizer = "Newton-CG"
   elif command == "4":
     optimizer = "CG"
-  autoencoder = MLP(layers, n_inputs, sigmoide, dsigmoide, optimizer)
+  autoencoder = MLP(layers, n_inputs, n_outputs, sigmoide, dsigmoide, optimizer)
   print("Entrenando red...")
   start = time.time()
   autoencoder.train_weights(font, font)
@@ -63,6 +73,14 @@ if command == "1a":
   print(end - start)
   print(" segundos")
   #mostrar resultados autoencoder
+
+  print(font[0].reshape((5, 7)))
+  activ1 = autoencoder.forward(font[0], True)
+  print(activ1)
+
+  print(font[1].reshape((5, 7)))
+  activ2 = autoencoder.forward(font[1], True)
+  print(activ2)
 
   #Latent layer values
   encoder = MLP.get_encoder_from_autoencoder(autoencoder, encoder_layers)
@@ -76,12 +94,13 @@ if command == "1a":
     plt.text(char[0], char[1], str(i))
   plt.show()
 
-  # #MOSTRAR DECODER
-  decoder = get_decoder_from_autoencoder(autoencoder, decoder_layers, latent_layers)
-  activations = []
-  for char in font:
-    activations.append(decoder.forward(char))
-  print(activations)
+  # generate new characters
+  decoder = MLP.get_decoder_from_autoencoder(autoencoder, decoder_layers)
+  for i in range(2):
+    activ = arr_step(decoder.forward(np.random.randn(1, 2))[0])
+    print(activ)
+
+  # print(activations)
   # plt.scatter(activations)
   # plt.show()
   
