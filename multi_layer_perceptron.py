@@ -24,7 +24,7 @@ class MLP:
         self.beta = beta
         self.max_epochs = max_epochs
         self.error = 0
-        self.error_threshold = 1e-5
+        self.error_threshold = 0.5
         self.batch = False
         self.momentum = momentum
 
