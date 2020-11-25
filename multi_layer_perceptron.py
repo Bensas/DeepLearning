@@ -4,7 +4,7 @@ from activation_functions import tanh, dtanh, sigmoide, dsigmoide
 
 class MLP:
 
-    def __init__(self, layers, data_attributes, beta=0.5, start_lr=0.05, end_lr=0.01, lr_decay='linear', max_epochs=10000, activ_function=sigmoide, activ_function_derivative=dsigmoide):
+    def __init__(self, layers, data_attributes, beta=0.5, start_lr=0.05, end_lr=0.01, lr_decay='linear', max_epochs=10000, activ_function=sigmoide, activ_function_derivative=dsigmoide, momentum=0.8):
 
         self.layers = layers
         self.weights = []
@@ -13,6 +13,7 @@ class MLP:
         self.layer_activations = [None] * (len(layers))
         self.deltas = [None] * (len(layers))
         self.deltaW = [None] * (len(layers))
+        self.prevDeltaW = [None] * (len(layers))
         self.learning_rate = np.array([])
         self.error_history = np.array([])
         self.activ_function = activ_function
@@ -25,6 +26,7 @@ class MLP:
         self.error = 0
         self.error_threshold = 1e-5
         self.batch = False
+        self.momentum = momentum
 
         for i in range(len(layers)):
             l_out = layers[i]
@@ -52,10 +54,7 @@ class MLP:
             if self.error < self.error_threshold:
                 break
 
-
-    # We expect data to already have the bias column added
     def forward(self, data):
-        # Cycle through each layer
         for i in range(len(self.layers)):
             layer_input = data if i == 0 else self.layer_activations[i - 1]
             layer_input = np.column_stack((layer_input, np.ones((len(layer_input),1))))
@@ -67,31 +66,25 @@ class MLP:
         output_layer = len(self.layers) - 1
         error_vector = (expected - self.layer_activations[output_layer])
         for i in range(output_layer, -1, -1):
-            # Casp especial para ultima y para primer layer:
-
-            
             curr_output = self.layer_outputs[i]
-
             if i == output_layer:
                 self.deltas[i] = error_vector * (self.activ_function_derivative(self.layer_outputs[i]))
-
             else:
                 dt = (self.deltas[i+1].dot(self.weights[i+1].T))
                 self.deltas[i] = self.activ_function_derivative(curr_output) * dt[:,:-1]
 
-        # create learning rate list for decay options
         self.get_lr_list(decay=self.learning_rate_decay)
 
         for i in range(len(self.layers)):
             prev_activation = data if i == 0 else self.layer_activations[i - 1]
             prev_activation = np.column_stack((prev_activation, np.ones((len(prev_activation),1))))
             self.deltaW[i] = self.learning_rate[epoch] * ((prev_activation).T).dot(self.deltas[i])
-            # print('epoch: %f \t lr: %f' % (epoch, self.learning_rate[epoch]))
+            if self.prevDeltaW[i] is None:
+                self.prevDeltaW[i] = np.zeros(self.deltaW[i].shape)
 
-        # Actualizar los pesos
         for i in range(output_layer, -1, -1):
-            self.weights[i] = self.weights[i] + self.deltaW[i]
-            # self.bias[i] = self.bias[i] + self.deltaB[i]
+            self.weights[i] = self.weights[i] + self.deltaW[i] + self.momentum * self.prevDeltaW[i]
+            self.prevDeltaW[i] = self.deltaW[i]
     
     @staticmethod
     def get_encoder_from_autoencoder(autoencoder, encoder_layers):
