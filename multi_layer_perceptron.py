@@ -4,7 +4,7 @@ from activation_functions import tanh, dtanh, sigmoide, dsigmoide
 
 class MLP:
 
-    def __init__(self, layers, data_attributes, beta=0.5, start_lr=0.05, end_lr=0.01, lr_decay='linear', max_epochs=10000, activ_function=sigmoide, activ_function_derivative=dsigmoide, momentum=0.4):
+    def __init__(self, layers, data_attributes, beta=0.5, start_lr=0.05, end_lr=0.01, max_epochs=10000, activ_function=sigmoide, activ_function_derivative=dsigmoide, momentum=0.4):
 
         self.layers = layers
         self.weights = []
@@ -14,13 +14,13 @@ class MLP:
         self.deltas = [None] * (len(layers))
         self.deltaW = [None] * (len(layers))
         self.prevDeltaW = [None] * (len(layers))
-        self.learning_rate = np.array([])
+        self.learning_rate = start_lr
+        self.learning_rate_delta = (end_lr - start_lr) / max_epochs
         self.error_history = np.array([])
         self.activ_function = activ_function
         self.activ_function_derivative = activ_function_derivative
         self.start_learning_rate = start_lr
         self.end_learning_rate = end_lr
-        self.learning_rate_decay = lr_decay
         self.beta = beta
         self.max_epochs = max_epochs
         self.error = 0
@@ -49,7 +49,8 @@ class MLP:
                     error += (np.sum(result - self.layer_activations[len(self.layers) - 1]) ** 2)
                 self.error = error / len(data)
                 self.error_history = np.append(self.error_history, self.error)
-
+            self.learning_rate += self.learning_rate_delta
+            print(self.learning_rate)
             print(self.error)
             if self.error < self.error_threshold:
                 break
@@ -73,12 +74,10 @@ class MLP:
                 dt = (self.deltas[i+1].dot(self.weights[i+1].T))
                 self.deltas[i] = self.activ_function_derivative(curr_output) * dt[:,:-1]
 
-        self.get_lr_list(decay=self.learning_rate_decay)
-
         for i in range(len(self.layers)):
             prev_activation = data if i == 0 else self.layer_activations[i - 1]
             prev_activation = np.column_stack((prev_activation, np.ones((len(prev_activation),1))))
-            self.deltaW[i] = self.learning_rate[epoch] * ((prev_activation).T).dot(self.deltas[i])
+            self.deltaW[i] = self.learning_rate * ((prev_activation).T).dot(self.deltas[i])
             if self.prevDeltaW[i] is None:
                 self.prevDeltaW[i] = np.zeros(self.deltaW[i].shape)
 
@@ -101,17 +100,3 @@ class MLP:
         result.weights = autoencoder.weights[-len(decoder_layers):]
         result.error = autoencoder.error
         return result
-
-    def get_lr_list(self, decay='None'):
-        if decay == 'None':
-            epoch_list = np.ones(self.max_epochs)
-            self.learning_rate = self.start_learning_rate * epoch_list
-        elif decay == 'hill':
-            epoch_list = np.linspace(0, 1, self.max_epochs)
-            self.learning_rate = (self.start_learning_rate - self.end_learning_rate) / (1 + (epoch_list / 0.5) ** 4) + self.end_learning_rate
-
-        elif decay == 'linear':
-            self.learning_rate = np.linspace(self.start_learning_rate, self.end_learning_rate, self.max_epochs)
-        else:
-            exit('exiting: invalid learning rate decay method chosen.')
-
