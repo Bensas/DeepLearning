@@ -4,11 +4,10 @@ from activation_functions import tanh, dtanh, sigmoide, dsigmoide
 
 class MLP:
 
-    def __init__(self, layers, data_attributes, beta=0.5, start_lr=0.05, end_lr=0.01, max_epochs=10000, activ_function=sigmoide, activ_function_derivative=dsigmoide, momentum=0.4):
+    def __init__(self, layers, data_attributes, beta=0.5, start_lr=0.05, end_lr=0.01, max_epochs=10000, activ_function=sigmoide, activ_function_derivative=dsigmoide, momentum=0.4, adaptive_lr=0.00):
 
         self.layers = layers
         self.weights = []
-        self.bias = []
         self.layer_outputs = [None] * (len(layers))
         self.layer_activations = [None] * (len(layers))
         self.deltas = [None] * (len(layers))
@@ -16,11 +15,10 @@ class MLP:
         self.prevDeltaW = [None] * (len(layers))
         self.learning_rate = start_lr
         self.learning_rate_delta = (end_lr - start_lr) / max_epochs
+        self.adaptive_learning_rate_factor = adaptive_lr
         self.error_history = np.array([])
         self.activ_function = activ_function
         self.activ_function_derivative = activ_function_derivative
-        self.start_learning_rate = start_lr
-        self.end_learning_rate = end_lr
         self.beta = beta
         self.max_epochs = max_epochs
         self.error = 0
@@ -31,7 +29,6 @@ class MLP:
             l_out = layers[i]
             l_in  = data_attributes if i == 0 else layers[i-1]
             self.weights.append(np.random.randn(l_in+1,l_out))
-            self.bias.append(np.ones((l_out,1)))
 
     def train_weights(self, data, expected):
         self.error = self.error_threshold + 1
@@ -44,8 +41,11 @@ class MLP:
                 error += (np.sum(result - self.layer_activations[len(self.layers) - 1]) ** 2)
             self.error = error / len(data)
             self.error_history = np.append(self.error_history, self.error)
+            self.adapt_learning_rate_delta()
             self.learning_rate += self.learning_rate_delta
+            print("lr:")
             print(self.learning_rate)
+            print("error:")
             print(self.error)
             if self.error < self.error_threshold:
                 break
@@ -80,6 +80,18 @@ class MLP:
             self.weights[i] = self.weights[i] + self.deltaW[i] + self.momentum * self.prevDeltaW[i]
             self.prevDeltaW[i] = self.deltaW[i]
     
+    def adapt_learning_rate_delta(self):
+        min_recent_error = self.get_min_recent_error()
+        if min_recent_error > self.error:
+            self.learning_rate_delta += self.adaptive_learning_rate_factor
+        else:
+            self.learning_rate_delta -= self.adaptive_learning_rate_factor * self.learning_rate_delta
+    
+    def get_min_recent_error(self):
+        if len(self.error_history) > 10:
+            return min(self.error_history[-10:])
+        else:
+            return min(self.error_history)
     @staticmethod
     def get_encoder_from_autoencoder(autoencoder, encoder_layers):
         result = MLP(encoder_layers, encoder_layers[0])
