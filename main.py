@@ -5,7 +5,7 @@ import numpy as np
 import time
 
 from noisy_functions import noisy_function_lighter, noisy_function_heavier, hexa_to_binary
-from fonts import font1, font2, font3
+from fonts import font1, font2, font3, cyrillic
 from multi_layer_perceptron import MLP
 from activation_functions import tanh, dtanh, sigmoide, dsigmoide
 
@@ -60,22 +60,11 @@ if command == "1a":
   
   print("Cargando informacion...\n")
   font = parse_font(font1)
+  print(font)
   print("Informacion cargada exitosamente\n")
-  # command = input("Seleccione metodo de optimizacion:\n1 - Powell\n2 - BFGS\n3 - Newton\n4 - Gradientes Conjugados\n5 - Ninguno\nSeleccione: ")
-  # if command == "1":
-  #   optimizer = "Powell"
-  # elif command == "2":
-  #   optimizer = "BFGS"
-  # elif command == "3":
-  #   optimizer = "Newton-CG"
-  # elif command == "4":
-  #   optimizer = "CG"
   print("Creando del autoenconder...\n")
   architecture = [35, 20, 10, 6, 2, 6, 10, 20, 35]
-  inputs = 35
   autoencoder = MLP(architecture)
-  for weight in autoencoder.weights:
-    print(weight.shape)
   print("Entrenando red...")
   start = time.time()
   autoencoder.train(font, font)
@@ -95,9 +84,6 @@ if command == "1a":
 
   #Latent layer values
   encoder = MLP.get_encoder_from_autoencoder(autoencoder, [35, 20, 10, 6, 2])
-  print("Encoder")
-  for weight in encoder.weights:
-    print(weight.shape)
   activations = encoder.forward(font)
 
   #Plotting
@@ -110,29 +96,7 @@ if command == "1a":
 
   # generate new characters
   decoder = MLP.get_decoder_from_autoencoder(autoencoder, [2, 6, 10, 20, 35])
-  print("Decoder")
-  for weight in decoder.weights:
-    print(weight.shape)
   activations = decoder.forward(activations)
-  print(activations)
-
-
-
-  # decoder = MLP.get_decoder_from_autoencoder(autoencoder, [2, 6, 10, 20, 35])
-  # for i in range(2):
-  #   x = random.random()
-  #   y = random.random()
-  #   print("[" + str(x) + ";" + str(y) + "]\n\n")
-  #   activ = decoder.forward([x,y])
-  #   index_array = 0
-  #   while(index_array < len(activ)):
-  #     print(arr_step(activ)[index_array:index_array + 5])
-  #     index_array = index_array + 5
-  #   print("\n\n")
-
-  # print(activations)
-  # plt.scatter(activations)
-  # plt.show()
   
   print("Ejercicio Finalizado.\n")
 
@@ -166,18 +130,50 @@ elif command == "1b":
   print("Ejercicio Finalizado.\n")
 
 elif command == "2":
-  data = parse_font(font1)
-  architecture = [35, 25, 17, 10, 6, 10, 17,25, 35]
-  attributes = len(data[0])
-  mlp = MLP(architecture, attributes)
-  mlp.train_weights(data, data)
-
-  print(data)
-  activ1 = mlp.forward(data)
-  for arr in activ1:
-    print(arr_step(arr))
   print("Cargando informacion...\n")
-  # falta
+  font = cyrillic
+  print_nicer(font)
   print("Informacion cargada exitosamente\n")
+  print("Creando del autoenconder...\n")
+  architecture = [35, 20, 10, 6, 2, 6, 10, 20, 35]
+  autoencoder = MLP(architecture)
+  print("Entrenando red...")
+  start = time.time()
+  autoencoder.train(font, font)
+  end = time.time()
+  print("Red entrenada.\n Tiempo transcurrido:")
+  print(end - start)
+  print(" segundos")
+
+  print_nicer(font)
+  activ1 = autoencoder.forward(font)
+  for arr in activ1:
+    index_array = 0
+    while(index_array < len(arr)):
+      print(arr_step(arr)[index_array:index_array + 5])
+      index_array = index_array + 5
+    print("\n\n")
+
+  # generate new characters
+  decoder = MLP.get_decoder_from_autoencoder(autoencoder, [2, 6, 10, 20, 35])
+
+  x1 = random.random()
+  x2 = random.random()
+  x3 = random.random()
+  y1 = random.random()
+  y2 = random.random()
+  y3 = random.random()
+  new_letters = [[x1, y1],[x2, y2],[x3, y3]]
+  activ1 = decoder.forward(new_letters)
+  index = 0
+  for arr in activ1:
+    index_array = 0
+    print("Numero generado al azar:\n")
+    print(new_letters[index])
+    index = index + 1
+    while(index_array < len(arr)):
+      print(arr_step(arr)[index_array:index_array + 5])
+      index_array = index_array + 5
+    print("\n\n")
 
   print("Ejercicio Finalizado.\n")
