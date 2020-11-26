@@ -1,5 +1,5 @@
 # DeepLearning
-Excercises on different deep learning concepts: Kohonen Networks, Oja PCA, Hopfield Model.
+Excercises on different deep learning concepts, based on autoencoder training for encoding, decoding, and denoising purposes.
 
 ## Instructions
 1) Install the following dependencies if necessary:
