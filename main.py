@@ -93,10 +93,10 @@ elif command == "1b":
   print("Cargando informacion...\n")
   font = hexa_to_binary(font1)
   print("Informacion cargada exitosamente. Aplicando ruido a la fuente...\n")
-  noisy_font = noisy_function_heavier(font, 0.05)
+  noisy_font = noisy_function_heavier(font, 0.08)
   print("Ruido aplicado. Creando el autoenconder...\n")
   architecture = [35, 20, 10, 6, 2, 6, 10, 20, 35]
-  autoencoder = MLP(architecture, start_lr=0.2, end_lr=0.001, adaptive_lr=0.001)
+  autoencoder = MLP(architecture, start_lr=0.08, end_lr=0.001)
   print("Entrenando red...")
   start = time.time()
   autoencoder.train(noisy_font, font)
@@ -105,7 +105,7 @@ elif command == "1b":
   print(end - start)
   print(" segundos\n")
 
-  test_noisy_font = noisy_function_heavier(font, 0.05)
+  test_noisy_font = noisy_function_heavier(font, 0.5)
 
   activ = autoencoder.forward(test_noisy_font)
   print_nicer(test_noisy_font)

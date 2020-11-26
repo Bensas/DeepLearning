@@ -36,7 +36,7 @@ class MLP:
         self.beta = beta
         self.max_epochs = max_epochs
         self.error = 0
-        self.error_threshold = 0.5
+        self.error_threshold = 0.01
         self.momentum = momentum
 
         for i in range(len(self.layers)):
