@@ -115,16 +115,16 @@ class MLP:
 
     @staticmethod
     def get_encoder_from_autoencoder(autoencoder, encoder_layers):
-        result = MLP(encoder_layers[1:], encoder_layers[0])
+        result = MLP(encoder_layers)
         result.beta = autoencoder.beta
-        result.weights = autoencoder.weights[0:len(encoder_layers[1:])]
+        result.weights = autoencoder.weights[0:len(encoder_layers)]
         result.error = autoencoder.error
         return result
     
     @staticmethod
     def get_decoder_from_autoencoder(autoencoder, decoder_layers):
-        result = MLP(decoder_layers[1:], decoder_layers[0])
+        result = MLP(decoder_layers)
         result.beta = autoencoder.beta
-        result.weights = autoencoder.weights[-len(decoder_layers[1:]):]
+        result.weights = autoencoder.weights[-len(decoder_layers)+1:]
         result.error = autoencoder.error
         return result
