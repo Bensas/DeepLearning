@@ -1,4 +1,5 @@
 from numpy import random
+import random
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
@@ -96,8 +97,6 @@ if command == "1a":
   #Latent layer values
   encoder = MLP.get_encoder_from_autoencoder(autoencoder, [35, 20, 10, 6, 2])
   print("Encoder")
-  for weight in encoder.weights:
-    print(weight.shape)
   activations = encoder.forward(font)
 
   #Plotting
@@ -111,10 +110,24 @@ if command == "1a":
   # generate new characters
   decoder = MLP.get_decoder_from_autoencoder(autoencoder, [2, 6, 10, 20, 35])
   print("Decoder")
-  for weight in decoder.weights:
-    print(weight.shape)
-  activations = decoder.forward(activations)
-  print(activations)
+  x1 = random.random()
+  x2 = random.random()
+  x3 = random.random()
+  y1 = random.random()
+  y2 = random.random()
+  y3 = random.random()
+  new_letters = [[x1, y1],[x2, y2],[x3, y3]]
+  activ1 = decoder.forward(new_letters)
+  index = 0
+  for arr in activ1:
+    index_array = 0
+    print("Numero generado al azar:\n")
+    print(new_letters[index])
+    index = index + 1
+    while(index_array < len(arr)):
+      print(arr_step(arr)[index_array:index_array + 5])
+      index_array = index_array + 5
+    print("\n\n")
 
 
 
