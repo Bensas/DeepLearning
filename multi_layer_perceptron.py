@@ -13,7 +13,7 @@ class MLP:
         max_epochs=10000,
         activ_function=sigmoide,
         activ_function_derivative=dsigmoide,
-        momentum=0,
+        momentum=0.4,
         adaptive_lr=0,
         needle_learning_rate_enabled=False):
 
@@ -116,17 +116,16 @@ class MLP:
 
     @staticmethod
     def get_encoder_from_autoencoder(autoencoder, encoder_layers):
-        result = MLP(encoder_layers, encoder_layers[0])
+        result = MLP(encoder_layers[1:], encoder_layers[0])
         result.beta = autoencoder.beta
-        result.weights = autoencoder.weights[0:len(encoder_layers)]
+        result.weights = autoencoder.weights[0:len(encoder_layers[1:])]
         result.error = autoencoder.error
         return result
     
     @staticmethod
     def get_decoder_from_autoencoder(autoencoder, decoder_layers):
-        console
-        result = MLP(decoder_layers, decoder_layers[0])
+        result = MLP(decoder_layers[1:], decoder_layers[0])
         result.beta = autoencoder.beta
-        result.weights = autoencoder.weights[-len(decoder_layers):]
+        result.weights = autoencoder.weights[-len(decoder_layers[1:]):]
         result.error = autoencoder.error
         return result

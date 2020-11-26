@@ -71,9 +71,11 @@ if command == "1a":
   # elif command == "4":
   #   optimizer = "CG"
   print("Creando del autoenconder...\n")
-  architecture = [35, 20, 10, 6, 2, 6, 10, 20, 35]
+  architecture = [20, 10, 6, 2, 6, 10, 20, 35]
   inputs = 35
   autoencoder = MLP(architecture, inputs)
+  for weight in autoencoder.weights:
+    print(weight.shape)
   print("Entrenando red...")
   start = time.time()
   autoencoder.train(font, font)
@@ -93,6 +95,9 @@ if command == "1a":
 
   #Latent layer values
   encoder = MLP.get_encoder_from_autoencoder(autoencoder, [35, 20, 10, 6, 2])
+  print("Encoder")
+  for weight in encoder.weights:
+    print(weight.shape)
   activations = encoder.forward(font)
 
   #Plotting
@@ -105,11 +110,12 @@ if command == "1a":
 
   # generate new characters
   decoder = MLP.get_decoder_from_autoencoder(autoencoder, [2, 6, 10, 20, 35])
+  print("Decoder")
+  for weight in decoder.weights:
+    print(weight.shape)
   activations = decoder.forward(activations)
   print(activations)
-    
-  (10, 3), (7 ,2)
-  layer_input.dot(self.weights[i])
+
 
 
   # decoder = MLP.get_decoder_from_autoencoder(autoencoder, [2, 6, 10, 20, 35])
