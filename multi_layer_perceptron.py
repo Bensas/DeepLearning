@@ -4,7 +4,18 @@ from activation_functions import tanh, dtanh, sigmoide, dsigmoide
 
 class MLP:
 
-    def __init__(self, layers, data_attributes, beta=0.5, start_lr=0.05, end_lr=0.01, max_epochs=10000, activ_function=sigmoide, activ_function_derivative=dsigmoide, momentum=0.4, adaptive_lr=0.00):
+    def __init__(self,
+        layers,
+        input_count,
+        beta=0.5,
+        start_lr=0.05,
+        end_lr=0.01,
+        max_epochs=10000,
+        activ_function=sigmoide,
+        activ_function_derivative=dsigmoide,
+        momentum=0,
+        adaptive_lr=0,
+        needle_learning_rate_enabled=False):
 
         self.layers = layers
         self.weights = []
@@ -14,8 +25,12 @@ class MLP:
         self.deltaW = [None] * (len(layers))
         self.prevDeltaW = [None] * (len(layers))
         self.learning_rate = start_lr
+        self.start_lr = start_lr
+        self.end_lr = end_lr
         self.learning_rate_delta = (end_lr - start_lr) / max_epochs
+        self.start_learning_rate_delta = self.learning_rate_delta
         self.adaptive_learning_rate_factor = adaptive_lr
+        self.needle_learning_rate_enabled = needle_learning_rate_enabled
         self.error_history = np.array([])
         self.activ_function = activ_function
         self.activ_function_derivative = activ_function_derivative
@@ -27,10 +42,10 @@ class MLP:
 
         for i in range(len(layers)):
             l_out = layers[i]
-            l_in  = data_attributes if i == 0 else layers[i-1]
+            l_in  = input_count if i == 0 else layers[i-1]
             self.weights.append(np.random.randn(l_in+1,l_out))
 
-    def train_weights(self, data, expected):
+    def train(self, data, expected):
         self.error = self.error_threshold + 1
         for epoch in range(self.max_epochs):
             error = 0
@@ -41,8 +56,11 @@ class MLP:
                 error += (np.sum(result - self.layer_activations[len(self.layers) - 1]) ** 2)
             self.error = error / len(data)
             self.error_history = np.append(self.error_history, self.error)
-            self.adapt_learning_rate_delta()
+            if not self.adaptive_learning_rate_factor == 0:
+                self.adapt_learning_rate_delta()
             self.learning_rate += self.learning_rate_delta
+            if self.needle_learning_rate_enabled:
+                self.learning_rate = self.get_needle_learning_rate()
             print("lr:")
             print(self.learning_rate)
             print("error:")
@@ -85,13 +103,17 @@ class MLP:
         if min_recent_error > self.error:
             self.learning_rate_delta += self.adaptive_learning_rate_factor
         else:
-            self.learning_rate_delta -= self.adaptive_learning_rate_factor * self.learning_rate_delta
+            self.learning_rate_delta = self.start_learning_rate_delta
     
     def get_min_recent_error(self):
         if len(self.error_history) > 10:
             return min(self.error_history[-10:])
         else:
             return min(self.error_history)
+    
+    def get_needle_learning_rate(self):
+        return self.start_lr * self.error * 0.01 + self.end_lr
+
     @staticmethod
     def get_encoder_from_autoencoder(autoencoder, encoder_layers):
         result = MLP(encoder_layers, encoder_layers[0])
@@ -102,6 +124,7 @@ class MLP:
     
     @staticmethod
     def get_decoder_from_autoencoder(autoencoder, decoder_layers):
+        console
         result = MLP(decoder_layers, decoder_layers[0])
         result.beta = autoencoder.beta
         result.weights = autoencoder.weights[-len(decoder_layers):]

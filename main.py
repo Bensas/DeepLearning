@@ -72,11 +72,11 @@ if command == "1a":
   #   optimizer = "CG"
   print("Creando del autoenconder...\n")
   architecture = [35, 20, 10, 6, 2, 6, 10, 20, 35]
-  attributes = 35
-  autoencoder = MLP(architecture, attributes)
+  inputs = 35
+  autoencoder = MLP(architecture, inputs)
   print("Entrenando red...")
   start = time.time()
-  autoencoder.train_weights(font, font)
+  autoencoder.train(font, font)
   end = time.time()
   print("Red entrenada.\n Tiempo transcurrido:")
   print(end - start)
@@ -101,13 +101,28 @@ if command == "1a":
   plt.scatter(x, y)
   for i, char in enumerate(activations):
     plt.text(char[0], char[1], str(i))
-  plt.show()
+  plt.show() 
 
   # generate new characters
   decoder = MLP.get_decoder_from_autoencoder(autoencoder, [2, 6, 10, 20, 35])
-  for i in range(2):
-    activ = arr_step(decoder.forward(np.random.randn(1, 2))[0])
-    print(activ)
+  activations = decoder.forward(activations)
+  print(activations)
+    
+  (10, 3), (7 ,2)
+  layer_input.dot(self.weights[i])
+
+
+  # decoder = MLP.get_decoder_from_autoencoder(autoencoder, [2, 6, 10, 20, 35])
+  # for i in range(2):
+  #   x = random.random()
+  #   y = random.random()
+  #   print("[" + str(x) + ";" + str(y) + "]\n\n")
+  #   activ = decoder.forward([x,y])
+  #   index_array = 0
+  #   while(index_array < len(activ)):
+  #     print(arr_step(activ)[index_array:index_array + 5])
+  #     index_array = index_array + 5
+  #   print("\n\n")
 
   # print(activations)
   # plt.scatter(activations)
@@ -118,31 +133,30 @@ if command == "1a":
 elif command == "1b":
   print("Cargando informacion...\n")
   font = hexa_to_binary(font1)
-  noisy_font = noisy_function_heavier(font, 0.5)
+  noisy_font = noisy_function_heavier(font, 0.05)
   print("Informacion cargada exitosamente\n")
   print("Creando del autoenconder...\n")
-  encoder_layers = [35, 20, 10, 6, 2]
-  decoder_layers = [2, 6, 10, 20, 35]
-  layers = put_layers_together(encoder_layers, decoder_layers)
-  n_inputs = encoder_layers[0]
-  command = input("Seleccione metodo de optimizacion:\n1 - Powell\n2 - BFGS\n3 - Newton\n4 - Gradientes Conjugados\n5 - Ninguno\nSeleccione: ")
-  if command == "1":
-    optimizer = "Powell"
-  elif command == "2":
-    optimizer = "BFGS"
-  elif command == "3":
-    optimizer = "Newton-CG"
-  elif command == "4":
-    optimizer = "CG"
-  autoencoder = MLP(layers, n_inputs, sigmoide, dsigmoide, optimizer)
+  architecture = [35, 20, 10, 6, 2, 6, 10, 20, 35]
+  inputs = 35
+  autoencoder = MLP(architecture, inputs, start_lr=0.2, end_lr=0.001, adaptive_lr=0.001)
   print("Entrenando red...")
   start = time.time()
-  autoencoder.train_weights(noisy_font, font)
+  autoencoder.train(noisy_font, font)
   end = time.time()
   print("Red entrenada.\n Tiempo transcurrido:")
   print(end - start)
   print(" segundos\n")
   print("Informacion cargada exitosamente\n")
+
+  test_noisy_font = noisy_function_heavier(font, 0.05)
+  activ = autoencoder.forward(test_noisy_font)
+  print_nicer(test_noisy_font)
+  for arr in activ:
+    index_array = 0
+    while(index_array < len(arr)):
+      print(arr_step(arr)[index_array:index_array + 5])
+      index_array = index_array + 5
+    print("\n\n")
 
   print("Ejercicio Finalizado.\n")
 
