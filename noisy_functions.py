@@ -27,7 +27,7 @@ def salt_and_pepper(font, quantity, salt_and_pepper):
         font[x][y] = 1 
         i = i + 1
 
-    how_much_pepper = int(np.ceil(quantity * size * salt_and_pepper))
+    how_much_pepper = int(np.ceil(quantity * size * (1 - salt_and_pepper)))
     i = 0
     while( i < how_much_pepper):
         x = randint(0, len(font)-1)
