@@ -71,9 +71,9 @@ if command == "1a":
   # elif command == "4":
   #   optimizer = "CG"
   print("Creando del autoenconder...\n")
-  architecture = [20, 10, 6, 2, 6, 10, 20, 35]
+  architecture = [35, 20, 10, 6, 2, 6, 10, 20, 35]
   inputs = 35
-  autoencoder = MLP(architecture, inputs)
+  autoencoder = MLP(architecture)
   for weight in autoencoder.weights:
     print(weight.shape)
   print("Entrenando red...")
@@ -143,8 +143,7 @@ elif command == "1b":
   print("Informacion cargada exitosamente\n")
   print("Creando del autoenconder...\n")
   architecture = [35, 20, 10, 6, 2, 6, 10, 20, 35]
-  inputs = 35
-  autoencoder = MLP(architecture, inputs, start_lr=0.2, end_lr=0.001, adaptive_lr=0.001)
+  autoencoder = MLP(architecture, start_lr=0.2, end_lr=0.001, adaptive_lr=0.001)
   print("Entrenando red...")
   start = time.time()
   autoencoder.train(noisy_font, font)

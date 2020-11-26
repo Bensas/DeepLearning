@@ -6,7 +6,6 @@ class MLP:
 
     def __init__(self,
         layers,
-        input_count,
         beta=0.5,
         start_lr=0.05,
         end_lr=0.01,
@@ -17,13 +16,13 @@ class MLP:
         adaptive_lr=0,
         needle_learning_rate_enabled=False):
 
-        self.layers = layers
+        self.layers = layers[1:]
         self.weights = []
-        self.layer_outputs = [None] * (len(layers))
-        self.layer_activations = [None] * (len(layers))
-        self.deltas = [None] * (len(layers))
-        self.deltaW = [None] * (len(layers))
-        self.prevDeltaW = [None] * (len(layers))
+        self.layer_outputs = [None] * (len(self.layers))
+        self.layer_activations = [None] * (len(self.layers))
+        self.deltas = [None] * (len(self.layers))
+        self.deltaW = [None] * (len(self.layers))
+        self.prevDeltaW = [None] * (len(self.layers))
         self.learning_rate = start_lr
         self.start_lr = start_lr
         self.end_lr = end_lr
@@ -40,9 +39,9 @@ class MLP:
         self.error_threshold = 0.5
         self.momentum = momentum
 
-        for i in range(len(layers)):
-            l_out = layers[i]
-            l_in  = input_count if i == 0 else layers[i-1]
+        for i in range(len(self.layers)):
+            l_out = self.layers[i]
+            l_in  = layers[0] if i == 0 else self.layers[i-1]
             self.weights.append(np.random.randn(l_in+1,l_out))
 
     def train(self, data, expected):
