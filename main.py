@@ -62,7 +62,7 @@ if command == "1a":
   font = parse_font(font1)
   print(font)
   print("Informacion cargada exitosamente\n")
-  print("Creando del autoenconder...\n")
+  print("Creando el autoenconder...\n")
   architecture = [35, 20, 10, 6, 2, 6, 10, 20, 35]
   autoencoder = MLP(architecture)
   print("Entrenando red...")
@@ -73,20 +73,9 @@ if command == "1a":
   print(end - start)
   print(" segundos")
 
-  print_nicer(font)
-  activ1 = autoencoder.forward(font)
-  for arr in activ1:
-    index_array = 0
-    while(index_array < len(arr)):
-      print(arr_step(arr)[index_array:index_array + 5])
-      index_array = index_array + 5
-    print("\n\n")
-
-  #Latent layer values
+  #1)a)3)Plot latent layer values
   encoder = MLP.get_encoder_from_autoencoder(autoencoder, [35, 20, 10, 6, 2])
   activations = encoder.forward(font)
-
-  #Plotting
   plt.title("Espacio latente")
   x, y = activations.T
   plt.scatter(x, y)
@@ -94,7 +83,7 @@ if command == "1a":
     plt.text(char[0], char[1], str(i))
   plt.show() 
 
-  # generate new characters
+  #1)a)4)Generate new characters
   decoder = MLP.get_decoder_from_autoencoder(autoencoder, [2, 6, 10, 20, 35])
   activations = decoder.forward(activations)
   
@@ -103,9 +92,9 @@ if command == "1a":
 elif command == "1b":
   print("Cargando informacion...\n")
   font = hexa_to_binary(font1)
+  print("Informacion cargada exitosamente. Aplicando ruido a la fuente...\n")
   noisy_font = noisy_function_heavier(font, 0.05)
-  print("Informacion cargada exitosamente\n")
-  print("Creando del autoenconder...\n")
+  print("Ruido aplicado. Creando el autoenconder...\n")
   architecture = [35, 20, 10, 6, 2, 6, 10, 20, 35]
   autoencoder = MLP(architecture, start_lr=0.2, end_lr=0.001, adaptive_lr=0.001)
   print("Entrenando red...")
@@ -115,9 +104,9 @@ elif command == "1b":
   print("Red entrenada.\n Tiempo transcurrido:")
   print(end - start)
   print(" segundos\n")
-  print("Informacion cargada exitosamente\n")
 
   test_noisy_font = noisy_function_heavier(font, 0.05)
+
   activ = autoencoder.forward(test_noisy_font)
   print_nicer(test_noisy_font)
   for arr in activ:
@@ -132,9 +121,8 @@ elif command == "1b":
 elif command == "2":
   print("Cargando informacion...\n")
   font = cyrillic
-  print_nicer(font)
   print("Informacion cargada exitosamente\n")
-  print("Creando del autoenconder...\n")
+  print("Creando el autoenconder...\n")
   architecture = [35, 20, 10, 6, 2, 6, 10, 20, 35]
   autoencoder = MLP(architecture)
   print("Entrenando red...")
@@ -145,16 +133,7 @@ elif command == "2":
   print(end - start)
   print(" segundos")
 
-  print_nicer(font)
-  activ1 = autoencoder.forward(font)
-  for arr in activ1:
-    index_array = 0
-    while(index_array < len(arr)):
-      print(arr_step(arr)[index_array:index_array + 5])
-      index_array = index_array + 5
-    print("\n\n")
-
-  # generate new characters
+  # Generate new characters
   decoder = MLP.get_decoder_from_autoencoder(autoencoder, [2, 6, 10, 20, 35])
 
   x1 = random.random()
