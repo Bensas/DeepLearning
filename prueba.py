@@ -2,19 +2,26 @@ import numpy as np
 from random import random
 from random import randint
 prob_of_change = 0.99
-fonts = [
-   [0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01],
-   [0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01]]
-simbols = [0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f]
-index_fonts = 0
-while(index_fonts < len(fonts)):
-    index_font = 0
-    while(index_font < len(fonts[index_fonts])):
-        if(random() < prob_of_change):
-            if(random() < prob_of_change):
-                fonts[index_fonts][index_font] = simbols[randint(0,len(simbols)-1)]
-            else:
-                fonts[index_fonts][index_font] = fonts[index_fonts][index_font]
-        index_font = index_font + 1
-    index_fonts = index_fonts + 1
-print(fonts)
+font = [
+   [0, 1, 1, 1, 0, 0, 0],
+   [0, 1, 1, 1, 0, 0, 0]]
+quantity=1
+salt_and_pepper=0.5
+size=len(font)*len(font[0])
+how_much_salt = int(np.ceil(quantity * size * salt_and_pepper))
+i = 0
+while( i < how_much_salt):
+    x = randint(0, len(font)-1)
+    y = randint(0, len(font[0])-1)
+    font[x][y] = 1 
+    i = i + 1
+
+how_much_pepper = int(np.ceil(quantity * size * salt_and_pepper))
+i = 0
+while( i < how_much_pepper):
+    x = randint(0, len(font)-1)
+    y = randint(0, len(font[0])-1)
+    font[x][y] = 0
+    i = i + 1
+
+print(font)
