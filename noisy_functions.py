@@ -17,6 +17,25 @@ def noisy_function_lighter(fonts, prob_of_change): #no se si el nombre tiene sen
         index_fonts = index_fonts + 1
     return fonts
 
+def salt_and_pepper(font, quantity, salt_and_pepper):
+    size=len(font)*len(font[0])
+    how_much_salt = int(np.ceil(quantity * size * salt_and_pepper))
+    i = 0
+    while( i < how_much_salt):
+        x = randint(0, len(font)-1)
+        y = randint(0, len(font[0])-1)
+        font[x][y] = 1 
+        i = i + 1
+
+    how_much_pepper = int(np.ceil(quantity * size * salt_and_pepper))
+    i = 0
+    while( i < how_much_pepper):
+        x = randint(0, len(font)-1)
+        y = randint(0, len(font[0])-1)
+        font[x][y] = 0
+        i = i + 1
+    return font
+
 def noisy_function_heavier(fonts, prob_of_change):
     index_fonts = 0
     while(index_fonts < len(fonts)):
